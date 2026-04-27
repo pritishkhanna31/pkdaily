@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily">
+<title>Daily — Pritish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #fdf6ec;
+  --card:     #fffdf8;
+  --surface:  #f5e9d8;
+  --text:     #2c1d0e;
+  --muted:    #8b6f52;
+  --faint:    #b8977a;
+  --amber:    #c2883a;
+  --green:    #2d6a3f;
+  --red:      #b83c2b;
+  --blue:     #2a5caa;
+  --border:   #e4cead;
+  --header-h: 72px;
+  --tabs-h:   64px;
+}
+
+html { height: 100%; }
+
+body {
+  min-height: 100%;
+  height: 100%;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── LAYOUT SHELL ─── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* ─── HEADER ─── */
+.app-header {
+  flex-shrink: 0;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px 0;
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+
+.app-header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.app-header-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+
+.app-header-name span { color: var(--amber); }
+
+.app-header-byline {
+  font-size: 11px;
+  color: var(--faint);
+  font-weight: 500;
+}
+
+.app-header-quote {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.65;
+  margin-top: 6px;
+  padding-bottom: 16px;
+}
+
+/* ─── TAB BAR (bottom) ─── */
+.tab-bar {
+  flex-shrink: 0;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(44,29,14,0.06);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 4px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--faint);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.tab-btn svg { width: 24px; height: 24px; transition: color 0.15s; }
+
+.tab-btn.active { color: var(--amber); }
+.tab-btn.active svg { color: var(--amber); }
+
+.tab-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 3px;
+  background: var(--amber);
+  border-radius: 0 0 4px 4px;
+}
+
+/* ─── SCROLLABLE CONTENT ─── */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-panel { display: none; padding: 20px 16px 32px; }
+.tab-panel.active { display: block; }
+
+/* ─── SECTION HEADING ─── */
+.section-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.4px;
+  margin-bottom: 18px;
+  line-height: 1.1;
+}
+
+.section-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+
+.section-sub:first-child { margin-top: 0; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  letter-spacing: -0.2px;
+}
+
+/* ─── STAT STRIP ─── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 10px;
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  display: block;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.stat-num.pos { color: var(--green); }
+.stat-num.neg { color: var(--red); }
+
+.stat-lbl {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  display: block;
+  margin-top: 5px;
+}
+
+.stat-edit-wrap { text-align: center; margin-top: 5px; }
+
+/* ─── INPUTS ─── */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 46px;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus, select:focus, textarea:focus { border-color: var(--amber); }
+
+textarea { resize: vertical; min-height: 100px; }
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.form-group { margin-bottom: 14px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  min-height: 46px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.btn-primary { background: var(--amber); color: #fff; }
+.btn-primary:hover { background: #a8732e; }
+.btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-full { width: 100%; }
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--faint);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-icon:hover { color: var(--red); }
+
+/* income edit */
+.income-edit-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: center;
+}
+.income-edit-row input {
+  width: 100px;
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 14px;
+  text-align: center;
+}
+.income-edit-row .btn { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+
+/* ─── LIST ITEMS ─── */
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.list-item:last-child { border-bottom: none; }
+.list-item-left { flex: 1; min-width: 0; }
+.list-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.list-item-amt {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.subtotal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.subtotal-row span:first-child { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.subtotal-row span:last-child { font-size: 17px; font-weight: 800; color: var(--amber); font-family: 'Playfair Display', Georgia, serif; }
+
+.cat-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--muted);
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+
+/* ─── PROGRESS BAR ─── */
+.prog-wrap { background: var(--surface); border-radius: 100px; height: 5px; overflow: hidden; margin-top: 7px; }
+.prog-bar { height: 100%; border-radius: 100px; transition: width 0.35s ease; }
+
+/* ─── TOGGLE GROUPS ─── */
+.toggle-group, .mood-group, .priority-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toggle-btn, .mood-btn, .priority-btn {
+  flex: 1;
+  padding: 11px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 46px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-btn.active, .mood-btn.active, .priority-btn.active {
+  background: var(--amber);
+  color: #fff;
+  border-color: var(--amber);
+}
+
+/* ─── WATER ─── */
+.water-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.water-count { font-size: 22px; font-weight: 800; color: var(--text); min-width: 52px; text-align: center; font-family: 'Playfair Display', Georgia, serif; }
+.water-circles { display: flex; gap: 8px; flex-wrap: wrap; }
+.water-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: var(--surface); transition: all 0.2s; }
+.water-circle.filled { background: var(--amber); border-color: var(--amber); }
+
+/* ─── SLIDER ─── */
+.slider-row { display: flex; align-items: center; gap: 14px; }
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  height: 5px; background: var(--surface); border-radius: 100px;
+  outline: none; border: none; flex: 1; min-height: auto; padding: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--amber); cursor: pointer; border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+.slider-val { font-size: 15px; font-weight: 700; min-width: 36px; text-align: right; font-family: 'Playfair Display', Georgia, serif; }
+
+/* ─── NUTRITION ─── */
+.nutrition-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ─── STREAK ─── */
+.streak-text { font-size: 12px; font-weight: 600; color: var(--green); margin-top: 8px; }
+
+/* ─── WEEKLY SUMMARY ─── */
+.week-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.week-stat { background: var(--surface); border-radius: 10px; padding: 13px; }
+.week-stat .wlbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.week-stat .wval { font-size: 20px; font-weight: 800; color: var(--text); margin-top: 4px; font-family: 'Playfair Display', Georgia, serif; }
+
+.chart-wrap { position: relative; height: 190px; }
+
+/* ─── TASKS ─── */
+.task-item { display: flex; align-items: flex-start; gap: 11px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+.task-item:last-child { border-bottom: none; }
+
+.task-check {
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 2px solid var(--border); background: var(--bg);
+  cursor: pointer; flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-size: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+.task-check.checked { background: var(--green); border-color: var(--green); color: #fff; }
+
+.task-body { flex: 1; min-width: 0; }
+.task-name { font-size: 14px; font-weight: 500; color: var(--text); transition: all 0.3s; }
+.task-name.done { text-decoration: line-through; color: var(--faint); }
+.task-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+
+.pri-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-high { background: #fce8e6; color: var(--red); }
+.badge-medium { background: #fdf0db; color: var(--amber); }
+.badge-low { background: var(--surface); color: var(--muted); }
+
+.task-due, .task-cat { font-size: 11px; color: var(--faint); }
+
+.completed-toggle {
+  background: none; border: none; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; padding: 10px 0; display: flex; align-items: center; gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.completed-toggle .chev { transition: transform 0.2s; font-size: 11px; }
+.completed-toggle.open .chev { transform: rotate(90deg); }
+
+/* ─── REVIEW ─── */
+.week-heading-big {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+
+.rv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.rv-stat { background: var(--surface); border-radius: 10px; padding: 13px; }
+.rv-stat .rlbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.rv-stat .rval { font-size: 19px; font-weight: 800; color: var(--text); margin-top: 4px; font-family: 'Playfair Display', Georgia, serif; }
+
+.past-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.past-week { font-size: 10px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.past-text { font-size: 13px; color: var(--text); line-height: 1.65; }
+
+/* ─── SUCCESS MSG ─── */
+.success-msg { color: var(--green); font-size: 12px; font-weight: 600; opacity: 0; transition: opacity 0.3s; margin-top: 10px; text-align: center; }
+.success-msg.show { opacity: 1; }
+
+/* ─── EMPTY ─── */
+.empty { color: var(--faint); font-size: 13px; padding: 16px 0; font-style: italic; }
+
+/* ─── DIVIDER ─── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+
+/* ─── SECTIONS OVERVIEW ─── */
+.sections-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.so-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+
+.so-item:active { transform: scale(0.96); }
+
+.so-icon {
+  width: 36px; height: 36px;
+  background: var(--surface);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  color: var(--amber);
+}
+
+.so-icon svg { width: 18px; height: 18px; }
+
+.so-label {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.so-desc {
+  font-size: 10px;
+  color: var(--faint);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 380px) {
+  .form-row { grid-template-columns: 1fr; }
+  .stat-num { font-size: 16px; }
+  .mood-btn { font-size: 12px; padding: 10px 6px; min-width: 0; }
+  .nutrition-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-header-top">
+      <div class="app-header-name">Daily<span>.</span></div>
+      <div class="app-header-byline">Pritish Khanna &middot; 2026</div>
+    </div>
+    <p class="app-header-quote">You cannot improve what you do not measure. So I stopped guessing and started tracking finances, health, productivity. Every day, honestly.</p>
+  </header>
+
+  <!-- SCROLLABLE CONTENT -->
+  <main class="app-content">
+
+    <!-- ══════════════ FINANCES ══════════════ -->
+    <div id="tab-finances" class="tab-panel active">
+      <div class="section-heading">Finances</div>
+
+      <!-- Sections overview -->
+      <div class="sections-overview">
+        <div class="so-item" onclick="switchTab('wellness', document.getElementById('nav-wellness'))">
+          <div class="so-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="so-label">Wellness</div>
+          <div class="so-desc">Steps, mood, water, nutrition</div>
+        </div>
+        <div class="so-item" onclick="switchTab('tasks', document.getElementById('nav-tasks'))">
+          <div class="so-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div class="so-label">Tasks</div>
+          <div class="so-desc">Priorities and to-dos</div>
+        </div>
+        <div class="so-item" onclick="switchTab('review', document.getElementById('nav-review'))">
+          <div class="so-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="so-label">Review</div>
+          <div class="so-desc">Weekly reflections</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <span class="stat-num" id="stat-income">€0</span>
+          <span class="stat-lbl">Income</span>
+          <div class="stat-edit-wrap">
+            <button class="btn-icon" id="income-edit-btn" onclick="toggleIncomeEdit()" title="Edit">&#9998;</button>
+          </div>
+          <div class="income-edit-row" id="income-edit-row" style="display:none;">
+            <input type="number" id="income-input" placeholder="0" min="0">
+            <button class="btn btn-primary" onclick="saveIncome()">Save</button>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="stat-spent">€0</span>
+          <span class="stat-lbl">Spent</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="stat-net">€0</span>
+          <span class="stat-lbl">Net</span>
+        </div>
+      </div>
+
+      <!-- Fixed Expenses -->
+      <div class="card">
+        <div class="card-title">Fixed Expenses</div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <div><input type="text" id="fixed-name" placeholder="Rent, Netflix…"></div>
+          <div><input type="number" id="fixed-amount" placeholder="Amount €" min="0" step="0.01"></div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="addFixedExpense()">Add Fixed Expense</button>
+        <div id="fixed-list" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- Daily Log -->
+      <div class="card">
+        <div class="card-title">Daily Log</div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <div class="form-group" style="margin:0;"><label>Date</label><input type="date" id="spend-date"></div>
+          <div class="form-group" style="margin:0;"><label>Category</label>
+            <select id="spend-cat">
+              <option>Food</option><option>Groceries</option><option>Transport</option>
+              <option>Entertainment</option><option>Shopping</option><option>Health</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <div class="form-group" style="margin:0;"><label>Description</label><input type="text" id="spend-desc" placeholder="What was this?"></div>
+          <div class="form-group" style="margin:0;"><label>Amount €</label><input type="number" id="spend-amount" placeholder="0.00" min="0" step="0.01"></div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="addSpendEntry()">Add Entry</button>
+        <div id="daily-list" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- Monthly Summary -->
+      <div class="card">
+        <div class="card-title">Monthly Summary</div>
+        <div class="chart-wrap"><canvas id="finance-chart"></canvas></div>
+        <div id="month-total-line" style="font-size:13px;color:var(--muted);margin:12px 0 8px;"></div>
+        <div id="monthly-full-list"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════ WELLNESS ══════════════ -->
+    <div id="tab-wellness" class="tab-panel">
+      <div class="section-heading">Wellness</div>
+
+      <div class="card">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="w-date">
+        </div>
+
+        <!-- Steps -->
+        <div class="form-group">
+          <label>Steps Walked</label>
+          <input type="number" id="w-steps" placeholder="0" min="0" oninput="updateStepsBar()">
+          <div class="prog-wrap"><div class="prog-bar" id="steps-bar" style="width:0%;background:var(--red);"></div></div>
+          <div style="font-size:11px;color:var(--faint);margin-top:4px;" id="steps-pct-text">0 / 10,000 goal</div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Screen Time -->
+        <div class="form-group">
+          <label>Screen Time</label>
+          <div class="slider-row">
+            <input type="range" id="w-screen" min="0" max="12" step="0.5" value="0" oninput="updateScreenVal()">
+            <span class="slider-val" id="screen-val">0h</span>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Productive -->
+        <div class="form-group">
+          <label>Productive Day?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" id="prod-yes" onclick="setProd('yes')">Yes</button>
+            <button class="toggle-btn" id="prod-no" onclick="setProd('no')">No</button>
+          </div>
+          <div class="streak-text" id="streak-text"></div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Water -->
+        <div class="form-group">
+          <label>Water Intake</label>
+          <div class="water-row">
+            <button class="btn btn-ghost" style="min-width:42px;padding:8px;" onclick="changeWater(-1)">−</button>
+            <span class="water-count" id="water-count">0 / 8</span>
+            <button class="btn btn-ghost" style="min-width:42px;padding:8px;" onclick="changeWater(1)">+</button>
+          </div>
+          <div class="water-circles" id="water-circles"></div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Nutrition -->
+        <div class="form-group">
+          <label style="margin-bottom:14px;">Nutrition</label>
+          <div class="nutrition-grid">
+            <div><label>Calories</label><input type="number" id="w-cal" placeholder="0" min="0" oninput="updateNutritionBars()">
+              <div class="prog-wrap"><div class="prog-bar" id="bar-cal" style="width:0%;background:var(--amber);"></div></div>
+              <div style="font-size:10px;color:var(--faint);margin-top:3px;">Target 2000 kcal</div>
+            </div>
+            <div><label>Protein (g)</label><input type="number" id="w-protein" placeholder="0" min="0" oninput="updateNutritionBars()">
+              <div class="prog-wrap"><div class="prog-bar" id="bar-protein" style="width:0%;background:var(--amber);"></div></div>
+              <div style="font-size:10px;color:var(--faint);margin-top:3px;">Target 150g</div>
+            </div>
+            <div><label>Carbs (g)</label><input type="number" id="w-carbs" placeholder="0" min="0" oninput="updateNutritionBars()">
+              <div class="prog-wrap"><div class="prog-bar" id="bar-carbs" style="width:0%;background:var(--amber);"></div></div>
+              <div style="font-size:10px;color:var(--faint);margin-top:3px;">Target 250g</div>
+            </div>
+            <div><label>Fat (g)</label><input type="number" id="w-fat" placeholder="0" min="0" oninput="updateNutritionBars()">
+              <div class="prog-wrap"><div class="prog-bar" id="bar-fat" style="width:0%;background:var(--amber);"></div></div>
+              <div style="font-size:10px;color:var(--faint);margin-top:3px;">Target 65g</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Mood -->
+        <div class="form-group">
+          <label>Mood</label>
+          <div class="mood-group">
+            <button class="mood-btn" onclick="setMood('Excellent')">Excellent</button>
+            <button class="mood-btn" onclick="setMood('Good')">Good</button>
+            <button class="mood-btn" onclick="setMood('Neutral')">Neutral</button>
+            <button class="mood-btn" onclick="setMood('Low')">Low</button>
+            <button class="mood-btn" onclick="setMood('Rough')">Rough</button>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Note -->
+        <div class="form-group">
+          <label>Daily Note</label>
+          <input type="text" id="w-note" placeholder="One line about today">
+        </div>
+
+        <button class="btn btn-primary btn-full" style="margin-top:6px;" onclick="saveWellness()">Save Day</button>
+        <div class="success-msg" id="wellness-success">Saved</div>
+      </div>
+
+      <!-- Weekly -->
+      <div class="card">
+        <div class="card-title">This Week</div>
+        <div class="week-stat-grid">
+          <div class="week-stat"><div class="wlbl">Avg Steps</div><div class="wval" id="wk-avg-steps">—</div></div>
+          <div class="week-stat"><div class="wlbl">Productive</div><div class="wval" id="wk-prod-days">—</div></div>
+          <div class="week-stat"><div class="wlbl">Avg Mood</div><div class="wval" id="wk-avg-mood">—</div></div>
+          <div class="week-stat"><div class="wlbl">Avg Water</div><div class="wval" id="wk-avg-water">—</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="steps-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ══════════════ TASKS ══════════════ -->
+    <div id="tab-tasks" class="tab-panel">
+      <div class="section-heading">Tasks</div>
+
+      <div class="card">
+        <div class="card-title">New Task</div>
+        <div class="form-group">
+          <label>Task Name</label>
+          <input type="text" id="task-name" placeholder="What needs doing?">
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin:0;"><label>Due (optional)</label><input type="date" id="task-due"></div>
+          <div class="form-group" style="margin:0;"><label>Category</label>
+            <select id="task-cat">
+              <option>Personal</option><option>Work</option><option>Health</option><option>Finance</option><option>Study</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+          <label>Priority</label>
+          <div class="priority-group">
+            <button class="priority-btn" id="pri-high" onclick="setPriority('High')">High</button>
+            <button class="priority-btn active" id="pri-medium" onclick="setPriority('Medium')">Medium</button>
+            <button class="priority-btn" id="pri-low" onclick="setPriority('Low')">Low</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" style="margin-top:6px;" onclick="addTask()">Add Task</button>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Active</div>
+      <div class="card" id="active-tasks-card">
+        <div id="active-tasks-list"></div>
+      </div>
+
+      <button class="completed-toggle" id="completed-toggle-btn" onclick="toggleCompleted()">
+        <span class="chev">&#9654;</span>
+        <span id="completed-label">Completed (0)</span>
+      </button>
+      <div id="completed-list-wrap" style="display:none;">
+        <div class="card" style="margin-top:8px;"><div id="completed-tasks-list"></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════ REVIEW ══════════════ -->
+    <div id="tab-review" class="tab-panel">
+      <div class="section-heading">Review</div>
+
+      <div class="week-heading-big" id="review-week-heading"></div>
+
+      <div class="card">
+        <div class="card-title">This Week At a Glance</div>
+        <div class="rv-grid">
+          <div class="rv-stat"><div class="rlbl">Total Spent</div><div class="rval" id="rv-spent">€0</div></div>
+          <div class="rv-stat"><div class="rlbl">Avg Steps</div><div class="rval" id="rv-steps">—</div></div>
+          <div class="rv-stat"><div class="rlbl">Productive</div><div class="rval" id="rv-prod">—</div></div>
+          <div class="rv-stat"><div class="rlbl">Avg Mood</div><div class="rval" id="rv-mood">—</div></div>
+          <div class="rv-stat"><div class="rlbl">Tasks Done</div><div class="rval" id="rv-tasks">—</div></div>
+          <div class="rv-stat"><div class="rlbl">Avg Water</div><div class="rval" id="rv-water">—</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Weekly Review</div>
+        <div class="form-group">
+          <label>What was your best decision this week?</label>
+          <textarea id="review-text" rows="4" placeholder="Write honestly…"></textarea>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="saveReview()">Save Review</button>
+        <div class="success-msg" id="review-success">Saved</div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 12px;">Past Reviews</div>
+      <div id="past-reviews"></div>
+    </div>
+
+  </main><!-- end app-content -->
+
+  <!-- BOTTOM TAB BAR -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" id="nav-finances" onclick="switchTab('finances',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+      Finances
+    </button>
+    <button class="tab-btn" id="nav-wellness" onclick="switchTab('wellness',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      Wellness
+    </button>
+    <button class="tab-btn" id="nav-tasks" onclick="switchTab('tasks',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      Tasks
+    </button>
+    <button class="tab-btn" id="nav-review" onclick="switchTab('review',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+      </svg>
+      Review
+    </button>
+  </nav>
+
+</div><!-- end app-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ── UTILS ──────────────────────────────────────────
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function monthKey() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function weekDates() {
+  const now=new Date(), day=now.getDay(), mon=new Date(now);
+  mon.setDate(now.getDate()-((day===0?7:day)-1));
+  return Array.from({length:7},(_,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); return d.toISOString().slice(0,10); });
+}
+function fmtDate(s){ if(!s)return''; const[y,m,d]=s.split('-'); return `${d}/${m}/${y}`; }
+function LS(k,fb){ try{ const v=localStorage.getItem(k); return v!==null?JSON.parse(v):fb; }catch{return fb;} }
+function LSset(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch{} }
+function euro(n){ return '€'+Number(n).toFixed(2); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+// ── TABS ───────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  document.querySelector('.app-content').scrollTop=0;
+  if(name==='finances') renderFinances();
+  if(name==='wellness') renderWellness();
+  if(name==='tasks') renderTasks();
+  if(name==='review') renderReview();
+}
+
+// ── FINANCES ───────────────────────────────────────
+let finChart=null;
+
+function toggleIncomeEdit(){
+  const row=document.getElementById('income-edit-row');
+  const vis=row.style.display!=='none';
+  row.style.display=vis?'none':'flex';
+  if(!vis){ document.getElementById('income-input').value=LS('income',0)||''; document.getElementById('income-input').focus(); }
+}
+
+function saveIncome(){
+  LSset('income', parseFloat(document.getElementById('income-input').value)||0);
+  document.getElementById('income-edit-row').style.display='none';
+  renderFinances();
+}
+
+function addFixedExpense(){
+  const name=document.getElementById('fixed-name').value.trim();
+  const amt=parseFloat(document.getElementById('fixed-amount').value);
+  if(!name||isNaN(amt)||amt<=0)return;
+  const list=LS('fixed-expenses',[]);
+  list.push({id:Date.now(),name,amount:amt});
+  LSset('fixed-expenses',list);
+  document.getElementById('fixed-name').value='';
+  document.getElementById('fixed-amount').value='';
+  renderFinances();
+}
+
+function deleteFixedExpense(id){ LSset('fixed-expenses',LS('fixed-expenses',[]).filter(e=>e.id!==id)); renderFinances(); }
+
+function addSpendEntry(){
+  const date=document.getElementById('spend-date').value||todayStr();
+  const desc=document.getElementById('spend-desc').value.trim();
+  const amt=parseFloat(document.getElementById('spend-amount').value);
+  const cat=document.getElementById('spend-cat').value;
+  if(!desc||isNaN(amt)||amt<=0)return;
+  const entries=LS('spend-entries',[]);
+  entries.push({id:Date.now(),date,desc,amount:amt,cat});
+  LSset('spend-entries',entries);
+  document.getElementById('spend-desc').value='';
+  document.getElementById('spend-amount').value='';
+  renderFinances();
+}
+
+function deleteSpendEntry(id){ LSset('spend-entries',LS('spend-entries',[]).filter(e=>e.id!==id)); renderFinances(); }
+
+function renderFinances(){
+  const income=LS('income',0);
+  const fixed=LS('fixed-expenses',[]);
+  const allEntries=LS('spend-entries',[]);
+  const today=todayStr(), mk=monthKey();
+  const monthEntries=allEntries.filter(e=>e.date&&e.date.startsWith(mk));
+  const fixedTotal=fixed.reduce((s,e)=>s+e.amount,0);
+  const spendTotal=monthEntries.reduce((s,e)=>s+e.amount,0);
+  const totalSpent=spendTotal+fixedTotal;
+  const net=income-totalSpent;
+
+  document.getElementById('stat-income').textContent=euro(income);
+  document.getElementById('stat-spent').textContent=euro(totalSpent);
+  const netEl=document.getElementById('stat-net');
+  netEl.textContent=(net>=0?'+':'')+euro(net);
+  netEl.className='stat-num '+(net>=0?'pos':'neg');
+
+  // Fixed list
+  const fixEl=document.getElementById('fixed-list');
+  fixEl.innerHTML=fixed.length===0
+    ?'<div class="empty">No fixed expenses yet.</div>'
+    :fixed.map(e=>`<div class="list-item">
+      <div class="list-item-left"><div class="list-item-name">${e.name}</div></div>
+      <div class="list-item-amt">${euro(e.amount)}</div>
+      <button class="btn-icon" onclick="deleteFixedExpense(${e.id})">&#10005;</button>
+    </div>`).join('')+`<div class="subtotal-row"><span>Subtotal</span><span>${euro(fixedTotal)}</span></div>`;
+
+  // Today's entries
+  const todayE=allEntries.filter(e=>e.date===today).sort((a,b)=>b.id-a.id);
+  const dailyEl=document.getElementById('daily-list');
+  dailyEl.innerHTML=todayE.length===0
+    ?'<div class="empty">Nothing logged today.</div>'
+    :todayE.map(e=>`<div class="list-item">
+      <div class="list-item-left">
+        <div class="list-item-name">${e.desc}</div>
+        <span class="cat-badge">${e.cat}</span>
+      </div>
+      <div class="list-item-amt">${euro(e.amount)}</div>
+      <button class="btn-icon" onclick="deleteSpendEntry(${e.id})">&#10005;</button>
+    </div>`).join('');
+
+  // Monthly
+  document.getElementById('month-total-line').textContent=`Total this month: ${euro(totalSpent)}`;
+  const monthSorted=monthEntries.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const mEl=document.getElementById('monthly-full-list');
+  if(monthSorted.length===0&&fixed.length===0){ mEl.innerHTML='<div class="empty">No transactions this month.</div>'; }
+  else {
+    let h='';
+    fixed.forEach(e=>{ h+=`<div class="list-item"><div class="list-item-left"><div class="list-item-name">${e.name}</div><span class="cat-badge">Fixed</span></div><div class="list-item-amt">${euro(e.amount)}</div></div>`; });
+    monthSorted.forEach(e=>{ h+=`<div class="list-item"><div class="list-item-left"><div class="list-item-name">${e.desc}</div><div class="list-item-meta">${fmtDate(e.date)}</div><span class="cat-badge">${e.cat}</span></div><div class="list-item-amt">${euro(e.amount)}</div><button class="btn-icon" onclick="deleteSpendEntry(${e.id})">&#10005;</button></div>`; });
+    mEl.innerHTML=h;
+  }
+
+  // Chart
+  const catColors={'Food':'#c2883a','Groceries':'#2d6a3f','Transport':'#2a5caa','Entertainment':'#8b4513','Shopping':'#b83c2b','Health':'#6b4e71','Other':'#8b7355','Fixed':'#3d2c1e'};
+  const catTotals={};
+  fixed.forEach(e=>{ catTotals['Fixed']=(catTotals['Fixed']||0)+e.amount; });
+  monthEntries.forEach(e=>{ catTotals[e.cat]=(catTotals[e.cat]||0)+e.amount; });
+  const labels=Object.keys(catTotals), data=labels.map(k=>catTotals[k]), colors=labels.map(k=>catColors[k]||'#8b7355');
+  const ctx=document.getElementById('finance-chart').getContext('2d');
+  if(finChart) finChart.destroy();
+  if(data.length===0){ finChart=null; return; }
+  finChart=new Chart(ctx,{ type:'doughnut', data:{ labels, datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fffdf8'}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{ position:'bottom', labels:{ font:{family:'DM Sans',size:11}, padding:14, color:'#8b6f52' } } } } });
+}
+
+// ── WELLNESS ───────────────────────────────────────
+let stepsChart=null;
+let wState={prod:null,mood:null,water:0};
+
+function updateStepsBar(){
+  const v=parseInt(document.getElementById('w-steps').value)||0;
+  const pct=clamp((v/10000)*100,0,100);
+  const bar=document.getElementById('steps-bar');
+  bar.style.width=pct+'%';
+  bar.style.background=v<4000?'var(--red)':v<8000?'var(--amber)':'var(--green)';
+  document.getElementById('steps-pct-text').textContent=`${v.toLocaleString()} / 10,000 goal`;
+}
+
+function updateScreenVal(){
+  const v=parseFloat(document.getElementById('w-screen').value);
+  const el=document.getElementById('screen-val');
+  el.textContent=v+'h';
+  el.style.color=v>6?'var(--red)':'var(--text)';
+}
+
+function setProd(v){
+  wState.prod=v;
+  document.getElementById('prod-yes').classList.toggle('active',v==='yes');
+  document.getElementById('prod-no').classList.toggle('active',v==='no');
+  updateStreak();
+}
+
+function updateStreak(){
+  const el=document.getElementById('streak-text');
+  if(wState.prod!=='yes'){el.textContent='';return;}
+  const date=document.getElementById('w-date').value||todayStr();
+  const data=LS('wellness-days',{});
+  let streak=0; const d=new Date(date); d.setDate(d.getDate()-1);
+  while(true){ const k=d.toISOString().slice(0,10); if(data[k]&&data[k].prod==='yes'){streak++;d.setDate(d.getDate()-1);}else break; }
+  el.textContent=`Streak: ${streak+1} day${streak+1!==1?'s':''} productive`;
+}
+
+function changeWater(delta){
+  wState.water=clamp((wState.water||0)+delta,0,8);
+  renderWaterUI();
+}
+
+function renderWaterUI(){
+  const w=wState.water||0;
+  document.getElementById('water-count').textContent=`${w} / 8`;
+  document.getElementById('water-circles').innerHTML=Array.from({length:8},(_,i)=>`<div class="water-circle${i<w?' filled':''}"></div>`).join('');
+}
+
+function setMood(v){
+  wState.mood=v;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.textContent===v));
+}
+
+function updateNutritionBars(){
+  const targets={cal:2000,protein:150,carbs:250,fat:65};
+  ['cal','protein','carbs','fat'].forEach(k=>{
+    const v=parseFloat(document.getElementById('w-'+k).value)||0;
+    const pct=clamp((v/targets[k])*100,0,100);
+    const bar=document.getElementById('bar-'+k);
+    bar.style.width=pct+'%';
+    bar.style.background=pct>=100?'var(--green)':'var(--amber)';
+  });
+}
+
+function saveWellness(){
+  const date=document.getElementById('w-date').value||todayStr();
+  const day={
+    steps:parseInt(document.getElementById('w-steps').value)||0,
+    screen:parseFloat(document.getElementById('w-screen').value)||0,
+    prod:wState.prod, water:wState.water||0,
+    cal:parseInt(document.getElementById('w-cal').value)||0,
+    protein:parseInt(document.getElementById('w-protein').value)||0,
+    carbs:parseInt(document.getElementById('w-carbs').value)||0,
+    fat:parseInt(document.getElementById('w-fat').value)||0,
+    mood:wState.mood, note:document.getElementById('w-note').value.trim()
+  };
+  const data=LS('wellness-days',{}); data[date]=day; LSset('wellness-days',data);
+  const msg=document.getElementById('wellness-success');
+  msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'),1800);
+  renderWeeklyWellness();
+}
+
+function loadWellnessForDate(date){
+  const data=LS('wellness-days',{}), day=data[date]||{};
+  document.getElementById('w-steps').value=day.steps||'';
+  document.getElementById('w-screen').value=day.screen||0;
+  document.getElementById('w-cal').value=day.cal||'';
+  document.getElementById('w-protein').value=day.protein||'';
+  document.getElementById('w-carbs').value=day.carbs||'';
+  document.getElementById('w-fat').value=day.fat||'';
+  document.getElementById('w-note').value=day.note||'';
+  wState.prod=day.prod||null; wState.water=day.water||0; wState.mood=day.mood||null;
+  document.getElementById('prod-yes').classList.toggle('active',day.prod==='yes');
+  document.getElementById('prod-no').classList.toggle('active',day.prod==='no');
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.textContent===day.mood));
+  updateStepsBar(); updateScreenVal(); renderWaterUI(); updateNutritionBars(); updateStreak();
+}
+
+function renderWeeklyWellness(){
+  const dates=weekDates(), data=LS('wellness-days',{});
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const entries=dates.map(d=>data[d]||null), withData=entries.filter(Boolean);
+  const avgSteps=withData.length?Math.round(withData.reduce((s,d)=>s+(d.steps||0),0)/withData.length):null;
+  const prodDays=withData.filter(d=>d.prod==='yes').length;
+  const moodOrder=['Excellent','Good','Neutral','Low','Rough'];
+  const moods=withData.filter(d=>d.mood).map(d=>d.mood);
+  const avgMood=moods.length?moodOrder[Math.round(moods.reduce((s,m)=>s+moodOrder.indexOf(m),0)/moods.length)]:null;
+  const avgWater=withData.length?(withData.reduce((s,d)=>s+(d.water||0),0)/withData.length).toFixed(1):null;
+
+  document.getElementById('wk-avg-steps').textContent=avgSteps!==null?avgSteps.toLocaleString():'—';
+  document.getElementById('wk-prod-days').textContent=withData.length?`${prodDays}/${withData.length}`:'—';
+  document.getElementById('wk-avg-mood').textContent=avgMood||'—';
+  document.getElementById('wk-avg-water').textContent=avgWater!==null?`${avgWater}/8`:'—';
+
+  const stepData=dates.map(d=>(data[d]&&data[d].steps)||0);
+  const ctx=document.getElementById('steps-chart').getContext('2d');
+  if(stepsChart) stepsChart.destroy();
+  stepsChart=new Chart(ctx,{ type:'bar',
+    data:{ labels:dayNames, datasets:[{ data:stepData, backgroundColor:stepData.map(v=>v>=8000?'#2d6a3f':v>=4000?'#c2883a':'#e4cead'), borderRadius:5, borderSkipped:false }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{beginAtZero:true,grid:{color:'#f5e9d8'},ticks:{font:{family:'DM Sans',size:11},color:'#b8977a'}},
+               x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#8b6f52'}} } } });
+}
+
+function renderWellness(){
+  const date=document.getElementById('w-date').value||todayStr();
+  document.getElementById('w-date').value=date;
+  loadWellnessForDate(date);
+  renderWeeklyWellness();
+}
+
+// ── TASKS ──────────────────────────────────────────
+let selPriority='Medium';
+
+function setPriority(p){
+  selPriority=p;
+  ['High','Medium','Low'].forEach(v=>document.getElementById('pri-'+v.toLowerCase()).classList.toggle('active',v===p));
+}
+
+function addTask(){
+  const name=document.getElementById('task-name').value.trim();
+  if(!name)return;
+  const tasks=LS('tasks',[]);
+  tasks.push({id:Date.now(),name,priority:selPriority,due:document.getElementById('task-due').value||'',cat:document.getElementById('task-cat').value,done:false,doneAt:null});
+  LSset('tasks',tasks);
+  document.getElementById('task-name').value='';
+  document.getElementById('task-due').value='';
+  renderTasks();
+}
+
+function toggleTask(id){
+  const tasks=LS('tasks',[]), t=tasks.find(t=>t.id===id);
+  if(t){t.done=!t.done;t.doneAt=t.done?Date.now():null;}
+  LSset('tasks',tasks); renderTasks();
+}
+
+function deleteTask(id){ LSset('tasks',LS('tasks',[]).filter(t=>t.id!==id)); renderTasks(); }
+
+function renderTasks(){
+  const tasks=LS('tasks',[]);
+  const priO={High:0,Medium:1,Low:2};
+  const active=tasks.filter(t=>!t.done).sort((a,b)=>{
+    const pd=priO[a.priority]-priO[b.priority]; if(pd!==0)return pd;
+    if(a.due&&b.due)return a.due.localeCompare(b.due); if(a.due)return -1; if(b.due)return 1; return 0;
+  });
+  const done=tasks.filter(t=>t.done).sort((a,b)=>b.doneAt-a.doneAt);
+
+  function taskHTML(t){
+    const bc=t.priority==='High'?'badge-high':t.priority==='Medium'?'badge-medium':'badge-low';
+    return `<div class="task-item">
+      <div class="task-check${t.done?' checked':''}" onclick="toggleTask(${t.id})">${t.done?'&#10003;':''}</div>
+      <div class="task-body">
+        <div class="task-name${t.done?' done':''}">${t.name}</div>
+        <div class="task-meta">
+          <span class="pri-badge ${bc}">${t.priority}</span>
+          ${t.due?`<span class="task-due">${fmtDate(t.due)}</span>`:''}
+          <span class="task-cat">${t.cat}</span>
+        </div>
+      </div>
+      <button class="btn-icon" onclick="deleteTask(${t.id})">&#10005;</button>
+    </div>`;
+  }
+
+  document.getElementById('active-tasks-list').innerHTML=active.length?active.map(taskHTML).join(''):'<div class="empty">No active tasks.</div>';
+  document.getElementById('completed-label').textContent=`Completed (${done.length})`;
+  document.getElementById('completed-tasks-list').innerHTML=done.length?done.map(taskHTML).join(''):'<div class="empty">Nothing completed yet.</div>';
+}
+
+function toggleCompleted(){
+  const wrap=document.getElementById('completed-list-wrap'),btn=document.getElementById('completed-toggle-btn');
+  const open=wrap.style.display!=='none';
+  wrap.style.display=open?'none':'block';
+  btn.classList.toggle('open',!open);
+}
+
+// ── REVIEW ─────────────────────────────────────────
+function getWeekLabel(dates){
+  const f=s=>{const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;};
+  return`${f(dates[0])} – ${f(dates[6])}`;
+}
+
+function saveReview(){
+  const text=document.getElementById('review-text').value.trim();
+  if(!text)return;
+  const dates=weekDates(), weekLabel=getWeekLabel(dates);
+  const reviews=LS('week-reviews',[]);
+  const ex=reviews.findIndex(r=>r.week===weekLabel);
+  const obj={week:weekLabel,text,ts:Date.now()};
+  if(ex>=0)reviews[ex]=obj; else reviews.unshift(obj);
+  LSset('week-reviews',reviews);
+  const msg=document.getElementById('review-success');
+  msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'),1800);
+  renderPastReviews();
+}
+
+function renderPastReviews(){
+  const reviews=LS('week-reviews',[]).slice(0,4);
+  const el=document.getElementById('past-reviews');
+  el.innerHTML=reviews.length===0
+    ?'<div class="empty">No past reviews yet.</div>'
+    :reviews.map(r=>`<div class="past-card"><div class="past-week">${r.week}</div><div class="past-text">${r.text}</div></div>`).join('');
+}
+
+function renderReview(){
+  const dates=weekDates();
+  document.getElementById('review-week-heading').textContent='Week of '+getWeekLabel(dates);
+  const allEntries=LS('spend-entries',[]), fixed=LS('fixed-expenses',[]);
+  const wellnessDays=LS('wellness-days',{}), tasks=LS('tasks',[]);
+  const weekSpend=dates.reduce((s,d)=>s+allEntries.filter(e=>e.date===d).reduce((ss,e)=>ss+e.amount,0),0);
+  document.getElementById('rv-spent').textContent=euro(weekSpend);
+  const wE=dates.map(d=>wellnessDays[d]).filter(Boolean);
+  const avgSteps=wE.length?Math.round(wE.reduce((s,d)=>s+(d.steps||0),0)/wE.length):null;
+  const prodDays=wE.filter(d=>d.prod==='yes').length;
+  const moodOrder=['Excellent','Good','Neutral','Low','Rough'];
+  const moods=wE.filter(d=>d.mood).map(d=>d.mood);
+  const avgMood=moods.length?moodOrder[Math.round(moods.reduce((s,m)=>s+moodOrder.indexOf(m),0)/moods.length)]:null;
+  const avgWater=wE.length?(wE.reduce((s,d)=>s+(d.water||0),0)/wE.length).toFixed(1):null;
+  document.getElementById('rv-steps').textContent=avgSteps!==null?avgSteps.toLocaleString():'—';
+  document.getElementById('rv-prod').textContent=wE.length?`${prodDays}/7`:'—';
+  document.getElementById('rv-mood').textContent=avgMood||'—';
+  document.getElementById('rv-water').textContent=avgWater!==null?`${avgWater}/8`:'—';
+  const wStart=new Date(dates[0]).getTime(), wEnd=new Date(dates[6]).getTime()+86400000;
+  document.getElementById('rv-tasks').textContent=tasks.filter(t=>t.done&&t.doneAt>=wStart&&t.doneAt<=wEnd).length;
+  renderPastReviews();
+}
+
+// ── PWA ────────────────────────────────────────────
+(function initPWA(){
+  const iconSVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#c2883a"/><text x="96" y="130" font-family="Georgia,serif" font-size="100" font-weight="bold" fill="white" text-anchor="middle">D</text></svg>`;
+  const iconURI='data:image/svg+xml;base64,'+btoa(iconSVG);
+  const manifest={name:"Daily — Pritish",short_name:"Daily",theme_color:"#c2883a",background_color:"#fdf6ec",display:"standalone",start_url:"./",icons:[{src:iconURI,sizes:"192x192",type:"image/svg+xml"}]};
+  const mBlob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const link=document.createElement('link'); link.rel='manifest'; link.href=URL.createObjectURL(mBlob); document.head.appendChild(link);
+  const apple=document.createElement('link'); apple.rel='apple-touch-icon'; apple.href=iconURI; document.head.appendChild(apple);
+  if('serviceWorker' in navigator){
+    const sw=`const C='daily-v2';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add('/')).catch(()=>{}));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request).then(r=>{return caches.open(C).then(c=>{try{c.put(e.request,r.clone());}catch{}return r;});}).catch(()=>caches.match(e.request))));});`;
+    const swBlob=new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  }
+})();
+
+// ── INIT ───────────────────────────────────────────
+(function init(){
+  const today=todayStr();
+  document.getElementById('spend-date').value=today;
+  document.getElementById('w-date').value=today;
+  document.getElementById('w-date').addEventListener('change',function(){ loadWellnessForDate(this.value); });
+  renderFinances();
+  renderWaterUI();
+})();
+</script>
+</body>
+</html>
